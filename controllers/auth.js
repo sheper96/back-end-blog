@@ -1,6 +1,9 @@
 const User = require('../models/user')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const BadRequestError = require('../errors/bad-request')
+const UnauthenticatedError = require('../errors/unauthenticated')
+const NotFoundError = require('../errors/not-found')
 
 exports.createUser = async (req, res, next) => {
     try {
@@ -8,7 +11,8 @@ exports.createUser = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(password, 6)
         const existed = await User.findOne({email})
         if (existed){
-            return res.status(400).json({error : "Account with this email already exists"})
+            throw new BadRequestError('Account with this email already exists')
+            //return res.status(400).json({error : "Account with this email already exists"})
         }
         const user = new User({
             userName: userName,
@@ -23,10 +27,11 @@ exports.createUser = async (req, res, next) => {
         })
     }
     catch (err) {
-        res.status(500).json({
-            message: 'Error creating user',
-            error: err
-        });
+        // res.status(500).json({
+        //     message: 'Error creating user',
+        //     error: err
+        // });
+        next(err)
     }
 }
 
@@ -40,10 +45,11 @@ exports.getAllUsers = async (req, res, next) => {
         })
     }
     catch (err) {
-        res.status(500).json({
-            message: 'Error fetching Users',
-            error: err
-        })
+        // res.status(500).json({
+        //     message: 'Error fetching Users',
+        //     error: err
+        // })
+        throw new(BadRequestError('Error fetching Users'))
     }
 }
 
@@ -51,10 +57,11 @@ exports.deleteUser = async (req, res, next) => {
     try {
         const deletedUser = User.findByIdAndDelete(req.body.userId)
         if (!deletedUser) {
-            res.status(404).json({
-                message: 'User nnot found',
+            throw new NotFoundError('User nnot found')
+            // res.status(404).json({
+            //     message: 'User nnot found',
 
-            })
+            // })
         }
         else {
             res.status(200).json({
@@ -64,10 +71,7 @@ exports.deleteUser = async (req, res, next) => {
         }
     }
     catch (err) {
-        res.status(500).json({
-            message: 'Error Deleting User',
-            error: err
-        })
+       next(err)
     }
 }
 
@@ -78,10 +82,11 @@ exports.updateUserPassword = (req, res, next) => {
     User.findOneAndUpdate(filter, update, { new: true })
         .then(user => {
             if (!user) {
-                res.status(404).json({
-                    message: 'User nnot found',
+                throw new NotFoundError('User not found')
+                // res.status(404).json({
+                //     message: 'User nnot found',
 
-                })
+                // })
             }
             else {
                 res.status(200).json({
@@ -91,11 +96,12 @@ exports.updateUserPassword = (req, res, next) => {
             }
         })
         .catch(err => {
-            res.status(500).json({
-                message: 'Error Updating Password User',
-                error: err
-            })
-            console.log(err)
+            next(err)
+            // res.status(500).json({
+            //     message: 'Error Updating Password User',
+            //     error: err
+            // })
+            // console.log(err)
         })
 }
 
@@ -106,10 +112,11 @@ exports.signIn = async (req, res, next) => {
         const { userName, password } = req.body
         const user = await User.findOne({ userName: userName })
         if (!user) {
-            return res.status(401).json({
-                message: 'Authentication failed. User not found',
+            throw new UnauthenticatedError('Authentication failed. User not found')
+            // return res.status(401).json({
+            //     message: 'Authentication failed. User not found',
 
-            })
+            // })
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
@@ -128,18 +135,21 @@ exports.signIn = async (req, res, next) => {
             })
         }
         else {
-            res.status(401).json({
-                message: 'Authentication failed. Wrong Password',
-            })
+            throw new UnauthenticatedError('Authentication failed. Wrong Password')
+
+            // res.status(401).json({
+            //     message: 'Authentication failed. Wrong Password',
+            // })
         }
 
 
     }
     catch (err) {
-        res.status(500).json({
-            message: 'Error ',
-            error: err
-        })
-        console.log(err)
+        // res.status(500).json({
+        //     message: 'Error ',
+        //     error: err
+        // })
+        // console.log(err)
+       next(err)
     }
 }
