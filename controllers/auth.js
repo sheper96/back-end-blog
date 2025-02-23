@@ -35,21 +35,41 @@ exports.createUser = async (req, res, next) => {
     }
 }
 
+exports.authMe = (req, res, next) => {
+    // const authHeader = req.headers['authorization']
+    // const token = authHeader.split(' ')[1];
+    // console.log(authHeader + "1")
+    console.log(req.cookies.token)
+    const token = req.cookies.token;
+    
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+    const decoded = jwt.verify(token, 'test'); 
+    const { iat, exp, ...user } = decoded;
+    res.json({ user });
+    }
+     catch (err) {
+      res.status(401).json({ error: 'Invalid token' });
+    }
+  };
+
 exports.getAllUsers = async (req, res, next) => {
 
     try {
         const users = await User.find()
+        if (!users){
+             throw new(BadRequestError('Error fetching Users'))
+        }
         res.status(200).json({
             message: 'Users Fetched Succesfully',
             users: users
         })
     }
     catch (err) {
-        // res.status(500).json({
-        //     message: 'Error fetching Users',
-        //     error: err
-        // })
-        throw new(BadRequestError('Error fetching Users'))
+        res.status(500).json({
+            message: 'Error fetching Users',
+            error: err
+        })
     }
 }
 
@@ -109,8 +129,8 @@ exports.updateUserPassword = (req, res, next) => {
 exports.signIn = async (req, res, next) => {
 
     try {
-        const { userName, password } = req.body
-        const user = await User.findOne({ userName: userName })
+        const { email, password } = req.body
+        const user = await User.findOne({ email: email })
         if (!user) {
             throw new UnauthenticatedError('Authentication failed. User not found')
             // return res.status(401).json({
@@ -120,7 +140,7 @@ exports.signIn = async (req, res, next) => {
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
-            const token = jwt.sign({ id: user._id }, 'moijopu', { expiresIn: '1h' });
+            const token = jwt.sign({ id: user._id , useName: user.userName, email : user.email  }, 'test', { expiresIn: '1h' });
 
             res.cookie('token', token, {
                 httpOnly: true,
@@ -150,6 +170,6 @@ exports.signIn = async (req, res, next) => {
         //     error: err
         // })
         // console.log(err)
-       next(err)
+      next(err)
     }
 }
