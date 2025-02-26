@@ -1,29 +1,14 @@
 const jwt = require('jsonwebtoken');
 
 exports.authenticate = (req, res, next) => {
-    console.log('auth middleware');
 
-    const authHeader = req.headers['authorization']
-    console.log(authHeader)
-    //const token = req.cookies.token
-    //console.log(token + "123")
-    
-
-    // if (!authHeader) {
-    //     return res.status(401).json({
-    //         message : 'Not Authorized'
-    //     })
-    // }
-
-    const token = authHeader.split(' ')[1];
-
+    const token = req.cookies.token;
     if (!token) {
           return res.status(401).json({
             message: 'Not Authorized'
         })
     }
-
-    jwt.verify(token, 'moijopu', (err, decoded) => {
+    jwt.verify(token, 'test', (err, decoded) => {
         if (err) {
             return res.status(401).json({ message: 'Invalid token' });
         }
@@ -33,7 +18,6 @@ exports.authenticate = (req, res, next) => {
         if (decoded.exp < currentTime) {
             return res.status(401).json({ message: 'Token expired' });
         }
-
         req.user = decoded; 
         next();
     })
