@@ -17,6 +17,6 @@ const postSchema = new Schema(
             required : true
         }
         
-});
+}, { collation: { locale: 'ru', strength: 2 }});
 
 module.exports = mongoose.model('Post' , postSchema);

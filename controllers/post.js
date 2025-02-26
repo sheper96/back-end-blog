@@ -1,8 +1,18 @@
+const BadRequestError = require('../errors/bad-request')
+const NotFoundError = require('../errors/not-found')
 const Post = require('../models/post')
 
 exports.createPost = (req, res, next) => {
     const { title, content } = req.body
+    console.log(req.body)
     const userId = req.user.id
+
+    if (!title) {
+        throw new (BadRequestError('Title required'))
+    }
+    if (!content) {
+        throw new (BadRequestError('Content required'))
+    }
 
     const post = new Post({
         title: title,
@@ -18,18 +28,24 @@ exports.createPost = (req, res, next) => {
             })
         })
         .catch(err => {
-            res.status(400).json({
-                message: 'Error While Creating a New Post'
-            })
-        })
+            next(err)
+        });
+
 }
 
 exports.getAllPosts = async (req, res, next) => {
-    console.log('get all posts')
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const startIndex = (page - 1) * limit;
+    const total = await Post.countDocuments();
     try {
-        const posts = await Post.find()
+        const posts = await Post.find().skip(startIndex).limit(limit);
         res.status(200).json({
             message: "Posts Fetched Succesfully",
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
             posts: posts
         })
     }
@@ -41,12 +57,20 @@ exports.getAllPosts = async (req, res, next) => {
 }
 
 exports.getMyPosts = async (req, res, next) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const startIndex = (page - 1) * limit;
+    const total = await Post.countDocuments({ author: req.user.id });
 
     try {
         const userId = req.user.id
-        const posts = await Post.find({ author: userId })
+        const posts = await Post.find({ author: userId }).skip(startIndex).limit(limit)
         res.status(200).json({
             message: "Posts Fetched Succesfully",
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
             posts: posts
         })
     }
@@ -57,6 +81,25 @@ exports.getMyPosts = async (req, res, next) => {
     }
 }
 
+exports.getPostById = async (req, res, next) => {
+    console.log('get')
+    try {
+        const postId = req.params.postId
+        const post = await Post.findById(postId)
+        if (!post){
+            throw new NotFoundError('Post not found')
+        }
+        res.status(200).json({
+            message: "Post Fetched Succesfully",
+            post: post
+        })
+    }
+    catch (err) {
+       next(err)
+    }
+}
+
+
 exports.deleteMyPostById = async (req, res, next) => {
 
     try {
@@ -64,9 +107,7 @@ exports.deleteMyPostById = async (req, res, next) => {
         const postId = req.params.postId
         const post = await Post.findOneAndDelete({ author: userId, _id: postId })
         if (!post) {
-            res.status(200).json({
-                message: "Post Not Found Or Already Deleted"
-            })
+            throw new NotFoundError('Post Not Found Or Already Deleted')
         }
         else {
             res.status(200).json({
@@ -75,43 +116,28 @@ exports.deleteMyPostById = async (req, res, next) => {
         }
     }
     catch (err) {
-        res.status(400).json({
-            message: "Error Deleting Post"
-        })
+        next()
     }
-    // const userId = req.user.id
-    // const postId = req.params.postId
-
-    // Post.findOneAndDelete({ author: userId, _id: postId }).then(post => {
-    //     if (!post) {
-    //         res.status(200).json({
-    //             message: "Post Not Found Or Already Deleted"
-    //         })
-    //     }
-    //     else {
-    //         res.status(200).json({
-    //             message: "Posts Deleted Succesfully",
-    //         })
-    //     }
-    // })
-    //     .catch(err => {
-    //         res.status(400).json({
-    //             message: "Error Deleting Post"
-    //         })
-    //     })
 }
 
 exports.updateMyPostById = async (req, res, next) => {
 
-    try{
+    try {
         const userId = req.user.id
+        console.log(userId + "userId")
         const postId = req.params.postId
+        console.log(req.body)
         const { title, content } = req.body
+        if (!title) {
+            return res.status(400).json({ message: "Title  required!" });
+        }
+        if (!content) {
+            return res.status(400).json({ message: "Content  required!" });
+        }
         const post = await Post.findOneAndUpdate({ author: userId, _id: postId }, { title: title, content: content }, { new: true })
+        console.log(post)
         if (!post) {
-            res.status(400).json({
-                message: "Post Not Found"
-            })
+            throw new (NotFoundError('Post Not Found '))
         }
         else {
             res.status(200).json({
@@ -120,32 +146,9 @@ exports.updateMyPostById = async (req, res, next) => {
             })
         }
     }
-
-    catch(err){
+    catch (err) {
         res.status(400).json({
-            message: "Error Deleting Post"
+            message: "Error Updating a Post"
         })
     }
-    // const userId = req.user.id
-    // const postId = req.params.postId
-    // const { title, content } = req.body
-
-    // Post.findOneAndUpdate({ author: userId, _id: postId }, { title: title, content: content }, { new: true }).then(post => {
-    //     if (!post) {
-    //         res.status(400).json({
-    //             message: "Post Not Found"
-    //         })
-    //     }
-    //     else {
-    //         res.status(200).json({
-    //             message: "Posts Updated Succesfully",
-    //             post: post
-    //         })
-    //     }
-    // })
-    //     .catch(err => {
-    //         res.status(400).json({
-    //             message: "Error Deleting Post"
-    //         })
-    //     })
 }
