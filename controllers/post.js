@@ -39,7 +39,7 @@ exports.getAllPosts = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
     const total = await Post.countDocuments();
     try {
-        const posts = await Post.find().skip(startIndex).limit(limit);
+        const posts = await Post.find().skip(startIndex).limit(limit).sort({ _id: -1 });
         res.status(200).json({
             message: "Posts Fetched Succesfully",
             page,
@@ -64,7 +64,7 @@ exports.getMyPosts = async (req, res, next) => {
 
     try {
         const userId = req.user.id
-        const posts = await Post.find({ author: userId }).skip(startIndex).limit(limit)
+        const posts = await Post.find({ author: userId }).skip(startIndex).limit(limit).sort({ _id: -1 })
         res.status(200).json({
             message: "Posts Fetched Succesfully",
             page,
