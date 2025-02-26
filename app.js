@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const connectDB = require('./db/connect')
 const dbURI = require('./config')
 const bodyParser = require('body-parser');
+const {errorHandler} = require('./middleware/erroHandlerMiddleware')
 // const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth');
@@ -21,6 +22,8 @@ app.use("/post", postRoutes);
 // app.get('/', (req, res) => {
 //     res.send('Hello, World!');
 // });
+
+app.use(errorHandler)
 
 
 const port = process.env.PORT || 3000;
