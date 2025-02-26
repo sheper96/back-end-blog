@@ -25,7 +25,7 @@ exports.createPost = (req, res, next) => {
 }
 
 exports.getAllPosts = async (req, res, next) => {
-
+    console.log('get all posts')
     try {
         const posts = await Post.find()
         res.status(200).json({
