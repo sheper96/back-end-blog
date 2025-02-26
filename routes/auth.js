@@ -9,9 +9,8 @@ const registerSchema = require('../validators/authValidators')
 router.post('/login', authController.signIn)
 router.post('/register', validateRequest(registerSchema), authController.createUser)
 router.get('/users', authenticate, authController.getAllUsers)
-router.get('/me', authController.authMe)
-router.delete('/users', authController.deleteUser)
-router.put('/users', authController.updateUserPassword)
+router.get('/me', authenticate , authController.authMe)
+router.post('/logout',authenticate, authController.logOut)
 
 
 module.exports = router;

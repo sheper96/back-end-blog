@@ -8,5 +8,3 @@ const dbName = process.env.DB_NAME;
 const dbURI = `mongodb+srv://${dbUser}:${dbPassword}@${dbHost}/${dbName}`;
 
 module.exports = dbURI;
-
-console.log("DB URI:", dbURI);
