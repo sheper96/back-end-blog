@@ -31,8 +31,20 @@ exports.createUser = async (req, res, next) => {
 }
 
 exports.authMe = (req, res, next) => {
-    const { iat, exp, ...user } = req.user
-    res.json({ user });
+    console.log("auth")
+    try {
+        if (!req.user){
+            return res.status(401).json({ message: "Not Authorized" });
+        }
+        const { iat, exp, ...user } = req.user
+        res.json({ user });
+    }
+    catch (err) {
+        res.status(500).json({
+            message: 'Auth Error',
+            error: err
+        })
+    }
 };
 
 exports.logOut = (req, res, next) => {
