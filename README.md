@@ -19,7 +19,7 @@ Security enhancements with Helmet and xss-clean
 1. Clone the repository:
 2. git clone https://github.com/sheper96/back-end-blog.git
 3. Install dependencies: npm install
-4 .Start the backend server:npm start
+4. Start the backend server:npm start
 
 ## Technologies Used
 
