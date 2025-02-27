@@ -39,7 +39,7 @@ const start = async () => {
   try {
     await connectDB(dbURI);
 
-    app.listen(port, () => console.log(`Server is listening port ${port}...`));
+    app.listen(port,"0.0.0.0", () => console.log(`Server is listening port ${port}...`));
   } catch (error) {
     console.log(error);
   }
