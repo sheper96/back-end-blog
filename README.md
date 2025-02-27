@@ -23,10 +23,10 @@ Security enhancements with Helmet and xss-clean
 
 ## Technologies Used
 
-Node.js & Express
-MongoDB & Mongoose
-JWT 
-Joi 
-Helmet & xss-clean for security
-bcrypt 
+- Node.js & Express
+- MongoDB & Mongoose
+- JWT 
+- Joi 
+- Helmet & xss-clean for security
+- bcrypt 
 
