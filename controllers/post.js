@@ -34,6 +34,7 @@ exports.createPost = (req, res, next) => {
 }
 
 exports.getAllPosts = async (req, res, next) => {
+    console.log('get posts')
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const startIndex = (page - 1) * limit;
