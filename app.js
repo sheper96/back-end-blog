@@ -20,11 +20,7 @@ app.use(xss());
 app.use(cookieParser());
 app.use(helmet());
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  credentials: true
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use("/auth", authRoutes);
