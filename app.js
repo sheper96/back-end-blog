@@ -22,8 +22,8 @@ app.use(helmet());
 
 app.use(cors({
   origin: 'http://localhost:3000', 
-  methods: "GET, POST, PUT, DELETE, OPTIONS", 
-  allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  methods: "GET, POST, PUT, DELETE", 
+  allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization , Access-Control-Allow-Origin",
   credentials: true, 
 }));
 app.use(express.json());
